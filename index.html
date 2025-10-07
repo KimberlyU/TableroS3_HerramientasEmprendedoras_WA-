@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramientas para el Éxito Emprendedor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .track-persona { background: linear-gradient(135deg, #8B5CF6, #EC4899); }
+        .track-proyecto { background: linear-gradient(135deg, #3B82F6, #06B6D4); }
+        .track-comunidad { background: linear-gradient(135deg, #10B981, #059669); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="max-w-md mx-auto bg-gray-50 min-h-screen">
+        </div>
+
+    <script>
+        // Estado de la aplicación
+        let state = {
+            selectedTrack: 0,
+            selectedWeek: 1,
+            completedChallenges: [], // Será un array de objetos: { id: "0-1-0", wildcardStatus: null | 'organizer' | 'assistant' }
+            selectedCard: null,
+            wildcardModalCard: null, // Para manejar el modal de Wildcard
+            userName: '',
+            userMatricula: ''
+        };
+
+        // Datos de las tarjetas de Semana 1, 2 y 3
+        const cardsData = [
+            // --- SEMANA 1 ---
+            {
+                id: "0-1-0",
+                name: "Define tus recursos personales",
+                details: "Identifica y organiza todos aquellos elementos internos e intangibles que posees y que pueden potenciar tu perfil e iniciativa. No se trata de dinero o capital financiero, sino de capacidades, redes y condiciones que representan un \"capital oculto\"",
+                evidence: "Define por escrito tus recursos utilizando la guía y formato en pptx que encuentras en el banco de recursos. Sube el formato contestado en pdf.",
+                track: "Persona",
+                week: 1,
+                duration: 1,
+                dependencies: null
+            },
+            {
+                id: "0-1-1",
+                name: "Podcast sobre mentalidad emprendedora",
+                details: "Escoge un episodio de podcast que refleje mentalidad emprendedora y analízalo utilizando la guía.",
+                evidence: "Haz el análisis del podcast utilizando el formato en pptx que encuentras en el banco de recursos. Sube el formato contestado en pdf.",
+                track: "Persona",
+                week: 1,
+                duration: 1,
+                dependencies: null
+            },
+            {
+                id: "0-1-2",
+                name: "Encuentra tus virtudes y fortalezas",
+                details: "Identifica tus virtudes fortalezas insignia y cómo aportan a tu perfil emprendedor.",
+                evidence: "Realiza el test de fortalezas y analiza por escrito utilizando la guía que encuentras en el banco de recursos. Sube tu análisis y resultados en pdf.",
+                track: "Persona",
+                week: 1,
+                duration: 1,
+                dependencies: null
+            },
+            {
+                id: "1-1-2-0",
+                name: "Define tu mapa de ruta",
+                details: "Con base en el documento de mapa de ruta define cuáles son los objetivos en los que te enfocarás este semestre.",
+                evidence: "Define en forma escrita los objetivos planteados y sus requerimientos. Para conocer el mapa de ruta, busca la guía en el banco de recursos.",
+                track: "Iniciativa",
+                week: 1,
+                duration: 2,
+                dependencies: "¡Este reto tiene continuación en la siguiente semana!"
+            },
+            {
+                id: "1-1-2-1",
+                name: "Diseña un tablero de seguimiento",
+                details: "Plantea tus objetivos y cuál es el factor de éxito para cada uno de ellos. Desglosa los pasos para alcanzarlos con fechas límite.",
+                evidence: "En un formato de tu preferencia construye tu documento de seguimiento. Revisa los criterios de éxito en la guía en pdf que encuentras en el banco de recursos.",
+                track: "Iniciativa",
+                week: 1,
+                duration: 2,
+                dependencies: "¡Este reto tiene continuación en la siguiente semana!"
+            },
+            {
+                id: "0-1-2-0",
+                name: "Recursos financieros a tu alcance",
+                details: "Tomar conciencia de tu realidad financiera más allá de lo obvio. Visualiza con perspectiva qué tan cerca o lejos están sus diferentes fuentes de financiamiento.",
+                evidence: "Define por escrito tus recursos financieros utilizando la guía que encuentras en el banco de recursos.",
+                track: "Persona",
+                week: 1,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "2-1-2-0",
+                name: "Asiste a un evento de tu comunidad",
+                details: "Identifica, selecciona y agenda tu asistencia a un evento relevante de tu comunidad. El énfasis está en elegir con una clara intención alineada a una meta clara que te hayas planteado y preparar un mini-plan de participación que te permita generar valor y conexiones.",
+                evidence: "Documenta tu asistencia utilizando la guía que encuentras en el banco de recursos.",
+                track: "Comunidad",
+                week: 1,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "2-1-3-0",
+                name: "¡Sal de la rutina!",
+                details: "Participa en una experiencia comunitaria diferente a tu rutina para activar curiosidad, generar conexiones significativas y obtener un aprendizaje práctico. ¡Sal de tu zona de confort!",
+                evidence: "Documenta tu asistencia utilizando la guía que encuentras en el banco de recursos.",
+                track: "Comunidad",
+                week: 1,
+                duration: 4,
+                dependencies: null
+            },
+            {
+                id: "1-1-3-0",
+                name: "Lectura de: Deep Work de Cal Newport",
+                details: "Obtén y haz la lectura del libro Deep Work de Cal Newport, llega al menos a la mitad del libro",
+                evidence: "Realiza un mapa mental de lo aprendido y un breve video en donde lo expliques.",
+                track: "Iniciativa",
+                week: 1,
+                duration: 4,
+                dependencies: null
+            },
+            // --- SEMANA 2 ---
+            {
+                id: "1-2-2-0",
+                name: "Plan de redes sociales",
+                details: "Define cuál es la red social con la que te gustaría compartir el desarrollo de tu emprendimiento y el plan para ser relevante en ésta.",
+                evidence: "Genera una cuenta en la red social definida para tu proyecto de emprendimiento y un plan de publicaciones. Sube evidencia de su creación.",
+                track: "Iniciativa",
+                week: 2,
+                duration: 2,
+                dependencies: "¡Este reto tiene continuación en la siguiente semana!"
+            },
+            {
+                id: "2-2-2-0",
+                name: "Amistad (emprendedora) por correspondencia",
+                details: "Crea una amistad por correspondencia con otra persona emprendedora para intercambiar aprendizajes, retroalimentación y dar seguimiento a metas mediante mensajes estructurados y periódicos.",
+                evidence: "Te sugerimos un Deck de diapositivas que evidencien la actividad. Usa la guía en pdf de canvas para profundizar y saber qué hacer.",
+                track: "Comunidad",
+                week: 2,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "0-2-2-0",
+                name: "Una cita contigo",
+                details: "Agenda una \"cita contigo\" de 60-120 min para reconectar con tu propósito, bienestar y creatividad mediante actividades conscientes, un micro-reto y reflexión personal. Diseña un mini-itinerario con intención clara, límites sanos y registro de aprendizajes y emociones.",
+                evidence: "Te sugerimos un Deck de diapositivas en donde plasmes el diseño de un mini-itinerario. Usa la guía en pdf de canvas para profundizar y saber qué hacer.",
+                track: "Persona",
+                week: 2,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "1-2-3-0",
+                name: "Lectura de: The One Thing de Gary W. Keller & Jay Papasan",
+                details: "Obtén y haz la lectura de The One Thing de Gary W. Keller & Jay Papasan, llega al menos a la mitad del libro.",
+                evidence: "Realiza un mapa mental de lo aprendido y un breve video en donde lo expliques.",
+                track: "Iniciativa",
+                week: 2,
+                duration: 4,
+                dependencies: null,
+                wildcard: {
+                    instruction: "Crea un club de lectura. Organiza un club de lectura con 3 o más compañeros, además de ti. Pueden reunirse de manera presencial o en línea. Deberán subir evidencia de la sesión. El organizador obtiene +2 puntos y cada asistente +1.",
+                    organizerPoints: 2,
+                    assistantPoints: 1
+                }
+            },
+            {
+                id: "1-2-2-1",
+                name: "Lectura de: Measure what matters de John Doerr",
+                details: "Obtén y haz la lectura de Measure what Matters de John Doerr, llega al menos a la mitad del libro.",
+                evidence: "Realiza un mapa mental de lo aprendido y un breve video en donde lo expliques.",
+                track: "Iniciativa",
+                week: 2,
+                duration: 2,
+                dependencies: null,
+                wildcard: {
+                    instruction: "Crea un club de lectura. Organiza un club de lectura con 3 o más compañeros, además de ti. Pueden reunirse de manera presencial o en línea. Deberán subir evidencia de la sesión. El organizador obtiene +2 puntos y cada asistente +1.",
+                    organizerPoints: 2,
+                    assistantPoints: 1
+                }
+            },
+            {
+                id: "1-2-1-0",
+                name: "Pide retroalimentación",
+                details: "Planea un focus group de personas que coincidan con el arquetipo de tu mercado meta y muestra tu proyecto o idea para recabar retroalimentación.",
+                evidence: "Desarrolla al menos 10 test cards y 10 learning cards para analizar los resultados. Documenta tu aprendizaje y documenta tendencias.",
+                track: "Iniciativa",
+                week: 2,
+                duration: 1,
+                dependencies: null
+            },
+            {
+                id: "2-2-2-1",
+                name: "Plasma y comparte tu visión",
+                details: "Convierte tu idea en un artefacto visual, claro y compartible que comunique qué quieres lograr, para quién y cómo empezarás. Preséntalo a tu comunidad para recibir retroalimentación, generar aliados y testear con mejoras.",
+                evidence: "Consulta la guía en canvas para tener detalles de qué hacer y qué necesitas entregar como evidencia.",
+                track: "Comunidad",
+                week: 2,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "2-2-1-1",
+                name: "Generosidad Emprendedora",
+                details: "Brinda una ayuda puntual y verificable a un emprendedor, generando un avance real (ej. conexión clave, retroalimentación accionable, micro-ejecución).",
+                evidence: "Consulta la guía en canvas para tener detalles de qué hacer y qué necesitas entregar como evidencia.",
+                track: "Comunidad",
+                week: 2,
+                duration: 1,
+                dependencies: null,
+                wildcard: {
+                    instruction: "Elige a alguien inscrito para brindarle tu ayuda e invítalo a que, a su vez, busque a otra persona inscrita a quien apoyar. Al ayudar a alguien (ser el 'organizador' de la ayuda) obtienes 2 puntos adicionales. Si fuiste el asistente/receptor de la ayuda, obtienes 1 punto.",
+                    organizerPoints: 2,
+                    assistantPoints: 1
+                }
+            },
+            {
+                id: "1-2-1-1",
+                name: "Rocket+ Elevator Pitch",
+                details: "Graba dos versiones de tu pitch, un Elevator de 45-60s con un \"ask\" claro y un Rocket de 3 min con 3 diapositivas. Súbelos y evidencia. Ensáyalos, pide feedback e integra mejoras antes de compartirlos.",
+                evidence: "Consulta la guía en canvas para tener detalles de qué hacer y qué necesitas entregar como evidencia.",
+                track: "Iniciativa",
+                week: 2,
+                duration: 1,
+                dependencies: null
+            },
+            {
+                id: "1-2-1-2",
+                name: "Actualización de tu tablero de seguimiento",
+                details: "Analiza la evidencia real de tu progreso y decide qué objetivos o pasos requieren ajuste en sus fechas, responsables o factores de éxito. Justifica los cambios que realices en tu tablero con base en la evidencia disponible.",
+                evidence: "Actualiza directamente tu tablero en la plataforma que hayas escogido. Sube evidencia de la actualización (antes y después) y tu reflexión.",
+                track: "Iniciativa",
+                week: 2,
+                duration: 1,
+                dependencies: "¡Dependencia a la vista 🫡! Desbloqueada por Reto: Tablero de seguimiento."
+            },
+            // --- SEMANA 3 ---
+            {
+                id: "1-3-1-0",
+                name: "Post en redes sociales",
+                details: "Crea un mensaje en donde compartas el arranque de tu emprendimiento o anuncies lo que haces. Diseña un plan de ejecución creativo para lograrlo.",
+                evidence: "Presenta evidencia de la subida del post y el impacto generado (likes, interacciones, etc).",
+                track: "Iniciativa",
+                week: 3,
+                duration: 1,
+                dependencies: "¡Dependencia a la vista! Desbloqueada por Reto: Plan de redes sociales"
+            },
+            {
+                id: "0-3-1-0",
+                name: "Podcast sobre proyectos de emprendimiento",
+                details: "Elige un episodio de podcast (en español o inglés) que cuente un proyecto emprendedor real alineado con algo que hoy necesites aprender.",
+                evidence: "Haz el análisis del podcast guiándote por las preguntas del formato que encuentras en el banco de recursos.",
+                track: "Persona",
+                week: 3,
+                duration: 1,
+                dependencies: null
+            },
+            {
+                id: "2-3-1-1",
+                name: "Conecta con tu red",
+                details: "En una semana, reactiva y fortalece tu red existente para avanzar un objetivo claro (validar, aprender, abrir puertas).",
+                evidence: "Presenta evidencia de las conversaciones activadas incluyendo los detalles mencionados en la guía que encuentras en el banco de recursos.",
+                track: "Comunidad",
+                week: 3,
+                duration: 1,
+                dependencies: null
+            },
+            {
+                id: "0-3-2-0",
+                name: "Imagina posibles futuros",
+                details: "En una semana, explora futuros posibles de tu vida académica/profesional y extrae decisiones robustas para empezar a moverte hoy hacia el futuro que anhelas.",
+                evidence: "Presenta evidencia de tu ejercicio de diseño incluyendo los detalles mencionados en la guía que encuentras en el banco de recursos.",
+                track: "Persona",
+                week: 3,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "1-3-2-0",
+                name: "Itera tu mapa de ruta",
+                details: "Conversa con un mentor o experto en la industria en la cual emprendes, sobre los objetivos que te has planteado y valida su pertinencia.",
+                evidence: "Elabora un plan de potenciales rutas alternativas de objetivos a cumplir. Sube evidencias de la conversación con mentor.",
+                track: "Iniciativa",
+                week: 3,
+                duration: 2,
+                dependencies: "¡Dependencia a la vista! Desbloqueada por Reto: Define tu mapa de ruta"
+            },
+            {
+                id: "2-3-2-0",
+                name: "Define tu mentor ideal",
+                details: "Gana claridad sobre qué necesitas aprender ahora y con quién te conviene caminar ese tramo. Durante esta semana, define el perfil de tu mentor/a ideal alineado a tus metas de 60-90 días.",
+                evidence: "Aterriza una petición concreta (ask) y prepara tu primer acercamiento con posibles mentores. Documenta tu proceso y sigue la guía que encuentras en banco de recursos.",
+                track: "Comunidad",
+                week: 3,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "1-3-2-1",
+                name: "Evalúa a tu equipo",
+                details: "Haz un análisis de tus conocimientos, talentos y habilidades y evalúa si necesitas otros que puedan provenir de personas adicionales a ti.",
+                evidence: "Genera una tabla de conocimientos, talentos y recursos faltantes y quién podría tenerlos.",
+                track: "Iniciativa",
+                week: 3,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "2-3-4-0",
+                name: "Identifica recursos óptimos",
+                details: "Parte de una meta personal clara (p. ej. aprender X, validar un prototipo, ampliar tu red o conseguir primeros usuarios) y mapea los recursos que ya existen en tu comunidad.",
+                evidence: "Presenta evidencia de tu ejercicio de diseño incluyendo los detalles mencionados en la guía que encuentras en el banco de recursos.",
+                track: "Comunidad",
+                week: 3,
+                duration: 4,
+                dependencies: null
+            },
+            {
+                id: "2-3-2-1",
+                name: "Crece tu red",
+                details: "Revisa tu mapa de red y elige tres personas que no conoces bien pero que podrían enseñarte algo, orientarte o simplemente te interesa conocer.",
+                evidence: "Presenta evidencia de tu ejercicio incluyendo los detalles mencionados en la guía que encuentras en el banco de recursos.",
+                track: "Comunidad",
+                week: 3,
+                duration: 2,
+                dependencies: null
+            },
+            {
+                id: "1-3-4-0",
+                name: "Prototipa tu idea",
+                details: "En una semana, convierte tu idea en un prototipo de baja fidelidad que permita simular la experiencia clave y probar una hipótesis central con personas del segmento.",
+                evidence: "Presenta evidencia de tu ejercicio incluyendo los detalles mencionados en la guía que encuentras en el banco de recursos.",
+                track: "Iniciativa",
+                week: 3,
+                duration: 4,
+                dependencies: null
+            },
+            {
+                id: "2-3-4-1",
+                name: "Crea tu propia red",
+                details: "En una semana, diseña y activa una micro-red intencional alineada a un propósito claro que hoy te ayude a avanzar.",
+                evidence: "Presenta evidencia de tu ejercicio incluyendo los detalles mencionados en la guía que encuentras en el banco de recursos.",
+                track: "Comunidad",
+                week: 3,
+                duration: 4,
+                dependencies: null
+            }
+        ];
+
+        // Configuración de tracks
+        const tracks = [
+            { id: 0, name: "Persona", icon: "👤", color: "track-persona", description: "Desarrollo personal y autoconocimiento emprendedor" },
+            { id: 1, name: "Proyecto", icon: "💼", color: "track-proyecto", description: "Desarrollo de tu idea de negocio" },
+            { id: 2, name: "Comunidad", icon: "👥", color: "track-comunidad", description: "Networking y construcción de redes" }
+        ];
+
+        // Configuración de niveles
+        const levels = [
+            { id: 1, name: "Nivel 1", time: "1-2 horas", points: 1, color: "bg-yellow-400", textColor: "text-yellow-800" },
+            { id: 2, name: "Nivel 2", time: "2-3 horas", points: 2, color: "bg-orange-400", textColor: "text-orange-800" },
+            { id: 3, name: "Nivel 3", time: "3+ horas", points: 4, color: "bg-red-400", textColor: "text-red-800" }
+        ];
+
+        // Mapeo de tracks del CSV a nuestros tracks
+        const trackMapping = { "Persona": 0, "Iniciativa": 1, "Comunidad": 2 };
+        
+        // Mapeo de duración a levelId
+        const durationToLevel = { 1: 1, 2: 2, 4: 3 };
+
+        // --- Funciones de Utilidad y Alertas ---
+        function showAlert(message) {
+            const alertHtml = `<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"><div class="bg-white rounded-2xl p-6 max-w-sm w-full"><div class="text-center"><div class="text-4xl mb-4">⚠️</div><p class="text-gray-800 mb-4">${message}</p><button onclick="closeAlert()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition-colors">Entendido</button></div></div></div>`;
+            document.body.insertAdjacentHTML('beforeend', alertHtml);
+        }
+
+        function showPointsAlert() {
+            const alertHtml = `<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"><div class="bg-white rounded-2xl p-6 max-w-sm w-full"><div class="text-center"><div class="text-4xl mb-4">⚠️</div><p class="text-gray-800 mb-6">Necesitas completar mínimo 4 puntos.</p><div class="space-y-3"><button onclick="closeAlert()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition-colors">¡Selecciona más retos!</button><button onclick="forceExportProgress()" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors">Voy a completar mis puntos restantes la siguiente semana</button></div></div></div></div>`;
+            document.body.insertAdjacentHTML('beforeend', alertHtml);
+        }
+
+        function closeAlert() {
+            const alert = document.body.querySelector('.fixed.inset-0');
+            if (alert) alert.remove();
+        }
+
+        function forceExportProgress() {
+            closeAlert();
+            performExport();
+        }
+
+        // --- Lógica de Exportación ---
+        function exportProgress() {
+            if (!state.userName.trim() || !state.userMatricula.trim()) {
+                showAlert("Escribe tu nombre completo y matrícula");
+                return;
+            }
+            if (getTotalPoints() < 4) {
+                showPointsAlert();
+                return;
+            }
+            performExport();
+        }
+
+        function performExport() {
+            const completedCardsDetails = state.completedChallenges.map(completed => {
+                const card = cardsData.find(c => c.id === completed.id);
+                if (!card) return null;
+                const level = levels.find(l => l.id === durationToLevel[card.duration]);
+                const basePoints = level ? level.points : 0;
+                let wildcardPoints = 0;
+                if (completed.wildcardStatus === 'organizer' && card.wildcard) {
+                    wildcardPoints = card.wildcard.organizerPoints;
+                } else if (completed.wildcardStatus === 'assistant' && card.wildcard) {
+                    wildcardPoints = card.wildcard.assistantPoints;
+                }
+                return {
+                    name: card.name,
+                    track: card.track,
+                    week: card.week,
+                    basePoints: basePoints,
+                    wildcardStatus: completed.wildcardStatus,
+                    wildcardPoints: wildcardPoints,
+                    totalPoints: basePoints + wildcardPoints
+                };
+            }).filter(Boolean);
+
+            const data = {
+                timestamp: new Date().toISOString(),
+                userName: state.userName,
+                userMatricula: state.userMatricula,
+                totalPoints: getTotalPoints(),
+                completedChallenges: completedCardsDetails
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `herramientas-exito-emprendedor-${state.userName.replace(/\s+/g, '-')}-${new Date().toLocaleDateString()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // --- Lógica de Estado de Tarjetas ---
+        function toggleCardCompletion(cardId) {
+            const index = state.completedChallenges.findIndex(c => c.id === cardId);
+            if (index > -1) {
+                state.completedChallenges.splice(index, 1);
+            } else {
+                state.completedChallenges.push({ id: cardId, wildcardStatus: null });
+            }
+            render();
+        }
+        
+        function completeWithWildcard(cardId, status) {
+            const index = state.completedChallenges.findIndex(c => c.id === cardId);
+            if (index > -1) {
+                state.completedChallenges[index].wildcardStatus = status;
+            } else {
+                state.completedChallenges.push({ id: cardId, wildcardStatus: status });
+            }
+            closeWildcardModal();
+            closeModal();
+        }
+
+        function isCardCompleted(cardId) {
+            return state.completedChallenges.some(c => c.id === cardId);
+        }
+        
+        function getCardCompletion(cardId) {
+            return state.completedChallenges.find(c => c.id === cardId);
+        }
+
+        // --- Lógica de Cálculo de Puntos ---
+        function getTotalPoints() {
+            return state.completedChallenges.reduce((total, completed) => {
+                const card = cardsData.find(c => c.id === completed.id);
+                if (!card) return total;
+
+                const level = levels.find(l => l.id === durationToLevel[card.duration]);
+                let points = level ? level.points : 0;
+
+                if (completed.wildcardStatus === 'organizer' && card.wildcard) {
+                    points += card.wildcard.organizerPoints;
+                } else if (completed.wildcardStatus === 'assistant' && card.wildcard) {
+                    points += card.wildcard.assistantPoints;
+                }
+                return total + points;
+            }, 0);
+        }
+
+        function getCardsForCurrentTrackAndWeek() {
+            const currentTrackName = tracks[state.selectedTrack].name;
+            const trackNameMapping = { "Persona": "Persona", "Proyecto": "Iniciativa", "Comunidad": "Comunidad" };
+            return cardsData.filter(card => 
+                card.track === trackNameMapping[currentTrackName] && 
+                card.week === state.selectedWeek
+            );
+        }
+        
+        // --- Event Handlers ---
+        function changeTrack(direction) {
+            state.selectedTrack = (state.selectedTrack + direction + tracks.length) % tracks.length;
+            render();
+        }
+
+        function setTrack(index) {
+            state.selectedTrack = index;
+            render();
+        }
+        
+        function setWeek(week) {
+            state.selectedWeek = week;
+            render();
+        }
+
+        function openCard(cardData) {
+            state.selectedCard = cardData;
+            render();
+        }
+
+        function closeModal() {
+            state.selectedCard = null;
+            render();
+        }
+        
+        function openWildcardModal() {
+            state.wildcardModalCard = state.selectedCard;
+            render();
+        }
+
+        function closeWildcardModal() {
+            state.wildcardModalCard = null;
+            render();
+        }
+
+        function updateUserInfo() {
+            state.userName = document.getElementById('userName').value;
+            state.userMatricula = document.getElementById('userMatricula').value;
+        }
+
+        // --- Funciones de Renderizado ---
+        function render() {
+            const currentTrack = tracks[state.selectedTrack];
+            const weekCards = getCardsForCurrentTrackAndWeek();
+            
+            document.getElementById('app').innerHTML = `
+                <div class="${currentTrack.color} text-white p-6 rounded-b-3xl shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h1 class="text-xl font-bold">Herramientas para el Éxito Emprendedor</h1>
+                            <p class="text-sm opacity-90">Tablero de Retos</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="bg-white bg-opacity-20 rounded-full px-3 py-1">
+                                <span class="text-sm font-bold">${getTotalPoints()} pts</span>
+                            </div>
+                            <p class="text-xs mt-1 opacity-75">Total ganados</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <button onclick="changeTrack(-1)" class="bg-white bg-opacity-20 rounded-full p-2 hover:bg-opacity-30 transition-colors">◀</button>
+                        <div class="text-center flex-1">
+                            <div class="flex items-center justify-center gap-2 mb-2">
+                                <span class="text-2xl">${currentTrack.icon}</span>
+                                <h2 class="text-xl font-bold">${currentTrack.name}</h2>
+                            </div>
+                            <p class="text-xs opacity-90">${currentTrack.description}</p>
+                        </div>
+                        <button onclick="changeTrack(1)" class="bg-white bg-opacity-20 rounded-full p-2 hover:bg-opacity-30 transition-colors">▶</button>
+                    </div>
+                </div>
+
+                <div class="mx-4 -mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 relative z-10">
+                    <h3 class="font-bold mb-3 text-center text-gray-800">Información del Estudiante</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="userName" placeholder="Nombre completo" value="${state.userName}" onchange="updateUserInfo()" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <input type="text" id="userMatricula" placeholder="Matrícula" value="${state.userMatricula}" onchange="updateUserInfo()" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex bg-white mx-4 mt-4 rounded-xl shadow-sm border border-gray-200">
+                    ${tracks.map((track, index) => `
+                        <button onclick="setTrack(${index})" class="flex-1 p-3 text-center rounded-xl transition-colors ${state.selectedTrack === index ? `${track.color} text-white` : 'text-gray-600 hover:bg-gray-50'}">
+                            <div class="text-xl mb-1">${track.icon}</div>
+                            <span class="text-xs font-medium">${track.name}</span>
+                        </button>
+                    `).join('')}
+                </div>
+                
+                <div class="mx-4 mt-4 flex justify-center bg-white rounded-xl p-2 shadow-sm border border-gray-200 space-x-2">
+                    ${[1, 2, 3, 4, 5].map(week => `
+                        <button onclick="setWeek(${week})" class="flex-1 p-3 text-center rounded-lg transition-colors ${state.selectedWeek === week ? `${currentTrack.color} text-white` : 'text-gray-600 hover:bg-gray-100'}">
+                            S${week}
+                        </button>
+                    `).join('')}
+                </div>
+
+                <div class="p-4 space-y-6">
+                    ${levels.map(level => {
+                        const levelCards = weekCards.filter(card => durationToLevel[card.duration] === level.id);
+                        if (levelCards.length === 0) return '';
+                        return `
+                            <div class="bg-white rounded-2xl p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="${level.color} w-3 h-3 rounded-full"></div>
+                                        <h3 class="font-bold text-gray-800">${level.name}</h3>
+                                        <span class="text-xs text-gray-500">(${level.time})</span>
+                                    </div>
+                                    <div class="${level.color} ${level.textColor} px-2 py-1 rounded-full text-xs font-bold">${level.points} pts c/u</div>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3">
+                                    ${levelCards.map(card => {
+                                        const completion = getCardCompletion(card.id);
+                                        const isCompleted = !!completion;
+                                        return `
+                                            <div onclick='openCard(${JSON.stringify(card).replace(/'/g, "&apos;")})' 
+                                                 class="relative bg-white rounded-xl border-2 ${isCompleted ? 'border-green-300 bg-green-50' : 'border-gray-200'} p-4 cursor-pointer hover:shadow-md transition-all duration-200">
+                                                <div class="absolute top-2 right-2 bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded-full">S${card.week}</div>
+                                                <div class="flex items-start justify-between mb-2">
+                                                    <div class="flex-1 pr-8">
+                                                        <h4 class="font-semibold text-sm ${isCompleted ? 'text-green-800' : 'text-gray-800'}">${card.name}</h4>
+                                                        ${card.dependencies ? `<p class="text-xs mt-1 text-blue-600 font-medium">${card.dependencies}</p>` : ''}
+                                                    </div>
+                                                    ${isCompleted ? `<div class="bg-green-500 text-white rounded-full p-1 text-xs">★</div>` : ''}
+                                                </div>
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-xs text-gray-500">⏱ ${level.time}</span>
+                                                        ${completion && completion.wildcardStatus ? `<span class="text-xs text-purple-600 font-bold">W</span>` : ''}
+                                                    </div>
+                                                    <div class="${level.color} ${level.textColor} px-2 py-1 rounded-full text-xs font-bold">${level.points} pts</div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <div class="mx-4 mb-6">
+                    <button onclick="exportProgress()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-600 transition-colors">📥 Exportar Mi Progreso</button>
+                </div>
+                
+                ${state.selectedCard ? renderModal() : ''}
+                ${state.wildcardModalCard ? renderWildcardModal() : ''}
+            `;
+        }
+
+        function renderModal() {
+            const card = state.selectedCard;
+            const level = levels.find(l => l.id === durationToLevel[card.duration]);
+            const completed = isCardCompleted(card.id);
+            return `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40">
+                    <div class="bg-white rounded-2xl p-6 max-w-sm w-full max-h-[90vh] overflow-y-auto">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex-1 pr-2">
+                                <h3 class="text-lg font-bold mb-3">${card.name}</h3>
+                                <div class="bg-blue-50 rounded-lg p-3 mb-4"><h4 class="text-sm font-bold text-blue-800 mb-2">📋 Descripción</h4><p class="text-sm text-blue-700">${card.details}</p></div>
+                            </div>
+                            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-xl ml-2">✕</button>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                            <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium">Duración estimada:</span><span class="text-sm text-gray-600">${level.time}</span></div>
+                            <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium">Puntos:</span><span class="${level.color} ${level.textColor} px-2 py-1 rounded-full text-xs font-bold">${level.points} puntos</span></div>
+                            <div class="flex items-center justify-between"><span class="text-sm font-medium">Semana:</span><span class="text-sm text-gray-600">Semana ${card.week}</span></div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3 mb-4"><h4 class="text-sm font-bold text-green-800 mb-2">🎯 Evidencia Sugerida</h4><p class="text-sm text-green-700">${card.evidence}</p></div>
+                        ${card.dependencies ? `<div class="bg-blue-50 rounded-lg p-3 mb-4"><h4 class="text-sm font-bold text-blue-800 mb-2">🔗 Dependencia</h4><p class="text-sm text-blue-700">${card.dependencies}</p></div>` : ''}
+                        
+                        <div class="space-y-3">
+                            <button onclick="toggleCardCompletion('${card.id}'); closeModal();" class="w-full py-3 rounded-xl font-semibold transition-colors ${completed ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600'}">${completed ? 'Marcar como Pendiente' : 'Completar Reto'}</button>
+                            ${card.wildcard ? `<button onclick="openWildcardModal()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-indigo-600 transition-colors">Realizar con Wildcard</button>` : ''}
+                            <button onclick="closeModal()" class="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderWildcardModal() {
+            const card = state.wildcardModalCard;
+            if (!card || !card.wildcard) return '';
+            return `
+                <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+                    <div class="bg-white rounded-2xl p-6 max-w-sm w-full max-h-[90vh] overflow-y-auto">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-lg font-bold">🌟 Wildcard: ${card.name}</h3>
+                            <button onclick="closeWildcardModal()" class="text-gray-500 hover:text-gray-700 text-xl ml-2">✕</button>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-3 mb-4">
+                            <h4 class="text-sm font-bold text-purple-800 mb-2">✨ Instrucción Especial</h4>
+                            <p class="text-sm text-purple-700">${card.wildcard.instruction}</p>
+                        </div>
+                        <div class="space-y-3">
+                            <button onclick="completeWithWildcard('${card.id}', 'organizer')" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors">
+                                Realicé el reto con Wildcard (+${card.wildcard.organizerPoints} pts)
+                            </button>
+                            <button onclick="completeWithWildcard('${card.id}', 'assistant')" class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                                Solamente fui asistente en el Wildcard (+${card.wildcard.assistantPoints} pt)
+                            </button>
+                            <button onclick="closeWildcardModal()" class="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Inicializar la aplicación
+        render();
+    </script>
+</body>
+</html>
